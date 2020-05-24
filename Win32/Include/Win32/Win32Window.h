@@ -67,7 +67,8 @@ namespace Win32
         RECT GetClientRectangle() const;
         LRESULT GetCorner(const POINTS& tag_points) const;
         LLUtils::PointI32 GetWindowSize() const;
-        FullSceenState GetFullScreenState() const { return fFullSceenState; };
+        FullSceenState GetFullScreenState() const { return fFullSceenState; }
+        void SetFullScreenState(FullSceenState fullScreenState);
         bool IsUnderMouseCursor() const;
         bool GetEraseBackground() const { return fEraseBackground; }
         DoubleClickMode GetDoubleClickMode() const { return fDoubleClickMode; }

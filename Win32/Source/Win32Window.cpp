@@ -352,6 +352,24 @@ namespace Win32
         MoveWindow(fHandleWindow, rect.left + delta_x, rect.top + delta_y, rect.right - rect.left, rect.bottom - rect.top, false);
     }
 
+    void Win32Window::SetFullScreenState(FullSceenState fullScreenState)
+    {
+    	switch (fullScreenState)
+    	{
+        case FullSceenState::Windowed:
+            SetWindowed();
+            break;
+        case FullSceenState::SingleScreen:
+            SetFullScreen(false);
+            break;
+        case FullSceenState::MultiScreen:
+            SetFullScreen(true);
+            break;
+        default:
+            LL_EXCEPTION_UNEXPECTED_VALUE;
+    	}
+    }
+	
     void Win32Window::ToggleFullScreen(bool multiMonitor)
     {
         switch (fFullSceenState)
