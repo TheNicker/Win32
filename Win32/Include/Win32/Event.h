@@ -2,6 +2,7 @@
 #include <functional>
 #include <vector>
 #include "Win32Common.h"
+#include <LLUtils/StringDefs.h>
 
 namespace Win32
 {
@@ -34,6 +35,6 @@ namespace Win32
         class EventDdragDropFile : public EventDragDrop
         {
         public:
-            std::wstring fileName;
+            LLUtils::native_string_type fileName;
         };
 }

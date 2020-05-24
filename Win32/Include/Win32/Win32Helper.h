@@ -82,7 +82,7 @@ namespace Win32
         }
 
 
-        static std::wstring OpenFile(HWND ownerWindow)
+        static LLUtils::native_string_type OpenFile(HWND ownerWindow)
         {
             LLUtils::native_char_type filename[MAX_PATH]{};
             OPENFILENAME ofn{};
@@ -94,7 +94,7 @@ namespace Win32
             ofn.lpstrTitle = LLUTILS_TEXT("Open a file");
             ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 
-            return GetOpenFileName(&ofn) == TRUE ? LLUtils::StringUtility::ToWString(LLUtils::native_string_type(filename)) : std::wstring();
+            return GetOpenFileName(&ofn) == TRUE ? LLUtils::native_string_type(filename) : LLUtils::native_string_type();
         }
     };
 }

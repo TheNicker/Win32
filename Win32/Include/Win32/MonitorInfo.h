@@ -24,7 +24,7 @@ namespace Win32
 
         const MonitorDesc& getMonitorInfo(size_t monitorIndex, bool allowRefresh = false);
         const MonitorDesc& getMonitorInfo(HMONITOR hMonitor, bool allowRefresh = false);
-        const size_t getMonitorsCount() const;
+        size_t getMonitorsCount() const;
         RECT getBoundingMonitorArea();
     private:
         using MapHMonitorToDesc = std::map<HMONITOR, MonitorDesc>;

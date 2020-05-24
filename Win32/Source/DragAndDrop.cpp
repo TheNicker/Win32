@@ -89,13 +89,13 @@ namespace Win32
             UINT cFiles = DragQueryFile(hdrop, 0xFFFFFFFF, nullptr, 0);
             for (UINT i = 0; i < cFiles; i++)
             {
-                TCHAR szFile[MAX_PATH];
+                LLUtils::native_char_type szFile[MAX_PATH];
                 UINT cch = DragQueryFile(hdrop, i, szFile, MAX_PATH);
                 if (cch > 0 && cch < MAX_PATH)
                 {
                     EventDdragDropFile evnt;
                     //DragDropFile evnt;
-                    evnt.fileName = LLUtils::StringUtility::ToWString(szFile) ;
+                    evnt.fileName = szFile ;
                     fParentWindow.RaiseEvent(evnt);
                 }
             }
