@@ -143,10 +143,9 @@ namespace Win32
             child->SetVisible(false);
 
         for (auto& child : fChildren)
-        {
             child->Destroy();
-            ::DestroyWindow(GetHandle());
-        }
+
+        ::DestroyWindow(GetHandle());
     }
 
 
