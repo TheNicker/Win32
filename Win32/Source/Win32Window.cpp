@@ -132,6 +132,8 @@ namespace Win32
                 MB_OK);
 
         }
+        fMouseCursor = ::LoadCursor(nullptr, IDC_ARROW);
+         
     }
 
 
@@ -487,7 +489,7 @@ namespace Win32
             }
             break;
         case WM_SETCURSOR:
-            if (GetMouseCursor() != nullptr)
+            //if (GetMouseCursor() != nullptr)
             {
                 ::SetCursor(fMouseCursor);
                 retValue = 1;
