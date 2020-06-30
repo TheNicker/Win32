@@ -1,5 +1,5 @@
 #pragma once
-#include <shlobj.h>
+#include <ShlObj.h>
 #include "Event.h"
 
 
@@ -9,7 +9,7 @@ namespace Win32
     {
 #pragma region IUnkown
     private:
-        LONG m_cRef;
+        size_t m_cRef;
         Win32Window& fParentWindow;
     public:
 

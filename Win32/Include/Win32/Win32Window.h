@@ -1,7 +1,7 @@
 #pragma once
 
-#include <windows.h>
-#include <Commctrl.h>
+#include <Windows.h>
+#include <CommCtrl.h>
 #include <vector>
 #include <functional>
 #include "DragAndDrop.h"

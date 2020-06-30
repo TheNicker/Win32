@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <wtypes.h>
+#include <vector>
+#include <LLUtils/Exception.h>
 
 namespace Win32
 {
@@ -42,24 +44,23 @@ namespace Win32
             case WindowPosOp::None:
                 return 0;
             case WindowPosOp::Placement:
-                return BaseFlags & (~(SWP_NOMOVE | SWP_NOSIZE));
+                return BaseFlags & static_cast<uint32_t>((~(SWP_NOMOVE | SWP_NOSIZE)));
             case WindowPosOp::Move:
-                return BaseFlags & ~SWP_NOMOVE;
+                return BaseFlags & static_cast<uint32_t>(~SWP_NOMOVE);
             case WindowPosOp::UpdateFrame:
-                return BaseFlags | SWP_FRAMECHANGED;
+                return BaseFlags | static_cast<uint32_t>(SWP_FRAMECHANGED);
             case WindowPosOp::Resize:
-                return BaseFlags & ~SWP_NOSIZE;
+                return BaseFlags & static_cast<uint32_t>(~SWP_NOSIZE);
             case WindowPosOp::Zorder:
-                return BaseFlags & ~SWP_NOZORDER;
             case WindowPosOp::AlwaysOnTop:
-                return BaseFlags & ~SWP_NOZORDER;
+                return BaseFlags & static_cast<uint32_t>(~SWP_NOZORDER);
 
             default:
                 LL_EXCEPTION_UNEXPECTED_VALUE;
             }
         }
 
-        static UINT ComposeFlags(std::vector< WindowPosOp> flags)
+        static UINT ComposeFlags(std::vector<WindowPosOp> flags)
         {
             UINT result = BaseFlags;
 
@@ -70,20 +71,22 @@ namespace Win32
                 case WindowPosOp::None:
                     break;
                 case WindowPosOp::Placement:
-                    result &= (~(SWP_NOMOVE | SWP_NOSIZE));
+                    result &= static_cast<UINT>((~(SWP_NOMOVE | SWP_NOSIZE)));
                     break;
                 case WindowPosOp::Move:
-                    result &= ~SWP_NOMOVE;
+                    result &= static_cast<UINT>(~SWP_NOMOVE);
                     break;
                 case WindowPosOp::UpdateFrame:
-                    result |= SWP_FRAMECHANGED;
+                    result |= static_cast<UINT>(SWP_FRAMECHANGED);
                     break;
                 case WindowPosOp::Resize:
-                    result &= ~SWP_NOSIZE;
+                    result &= static_cast<UINT>(~SWP_NOSIZE);
                     break;
+                case WindowPosOp::AlwaysOnTop:
                 case WindowPosOp::Zorder:
-                    result &= ~SWP_NOZORDER;
+                    result &= static_cast<UINT>(~SWP_NOZORDER);
                     break;
+
                 default:
                     LL_EXCEPTION_UNEXPECTED_VALUE;
                 }
@@ -103,12 +106,12 @@ namespace Win32
 
         static void SetSize(HWND handle, uint32_t width, uint32_t height)
         {
-            SetWindowPos(handle, nullptr, 0, 0, width, height, GetFlagsForWindowSetPosOp(WindowPosOp::Resize));
+            SetWindowPos(handle, nullptr, 0, 0, static_cast<int>(width), static_cast<int>(height), GetFlagsForWindowSetPosOp(WindowPosOp::Resize));
         }
 
         static void SetPlacement(HWND handle, int32_t x, int32_t y, uint32_t width, uint32_t height)
         {
-            SetWindowPos(handle, nullptr, x, y, width, height, GetFlagsForWindowSetPosOp(WindowPosOp::Placement));
+            SetWindowPos(handle, nullptr, x, y, static_cast<int>(width), static_cast<int>(height), GetFlagsForWindowSetPosOp(WindowPosOp::Placement));
         }
 
         static void UpdateFrame(HWND handle)

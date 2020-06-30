@@ -367,6 +367,7 @@ namespace Win32
         case FullSceenState::MultiScreen:
             SetFullScreen(true);
             break;
+        case FullSceenState::Default:
         default:
             LL_EXCEPTION_UNEXPECTED_VALUE;
     	}
@@ -388,6 +389,7 @@ namespace Win32
         case FullSceenState::MultiScreen:
             SetWindowed();
             break;
+        case FullSceenState::Default:
         default:
             LL_EXCEPTION_UNEXPECTED_VALUE;
         }
@@ -475,7 +477,7 @@ namespace Win32
                     break;
                 case LockMouseToWindowMode::LockResize:
                     defaultProc = false;
-                    retValue = GetCorner(*(POINTS*)&message.lParam);
+                    retValue = GetCorner(*reinterpret_cast<const POINTS*>(&message.lParam));
                     break;
                 case LockMouseToWindowMode::LockMove:
                 {
@@ -512,7 +514,7 @@ namespace Win32
                 //Do nothing
                 break;
             case DoubleClickMode::Default:
-                if (DefWindowProc(message.hWnd, WM_NCHITTEST, message.wParam, message.lParam) != message.wParam)
+                if (static_cast<WPARAM>(DefWindowProc(message.hWnd, WM_NCHITTEST, message.wParam, message.lParam)) != message.wParam)
                     defaultProc = false;
                 break;
             case DoubleClickMode::NonClientArea:
@@ -531,7 +533,7 @@ namespace Win32
             if (GetEraseBackground() == true)
             {
                 RECT rect = GetClientRectangle();
-                FillRect((HDC)message.wParam, &rect, fBackgroundCachedBrush);
+                FillRect(reinterpret_cast<HDC>(message.wParam), &rect, fBackgroundCachedBrush);
             }
         }
         break;
@@ -575,7 +577,7 @@ namespace Win32
         //WM_CREATE                       0x0001
         if (message == WM_CREATE)
         {
-            CREATESTRUCT* s = (CREATESTRUCT*)lParam;
+            CREATESTRUCT* s = reinterpret_cast<CREATESTRUCT*>(lParam);
             if (SetProp(hWnd, _T("windowClass"), s->lpCreateParams) == 0)
                 std::exception("Unable to set window property");
             reinterpret_cast<Win32Window*>(s->lpCreateParams)->fHandleWindow = hWnd;

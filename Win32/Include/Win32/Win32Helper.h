@@ -1,5 +1,5 @@
 #pragma once
-#include <windows.h>
+#include <Windows.h>
 #include <LLUtils/Point.h>
 #include <LLUtils/StringUtility.h>
 #include <string>
@@ -11,13 +11,13 @@ namespace Win32
     public:
         static bool IsKeyPressed(DWORD virtualKey)
         {
-            return (GetKeyState(virtualKey) & static_cast<USHORT>(0x8000)) != 0;
+            return (GetKeyState(static_cast<int>(virtualKey)) & static_cast<USHORT>(0x8000)) != 0;
 
         }
 
         static bool IsKeyToggled(DWORD virtualKey)
         {
-            return (GetKeyState(virtualKey) & static_cast<USHORT>(0x0001)) != 0;
+            return (GetKeyState(static_cast<int>(virtualKey)) & static_cast<USHORT>(0x0001)) != 0;
 
         }
 

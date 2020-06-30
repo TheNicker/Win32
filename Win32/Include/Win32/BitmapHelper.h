@@ -31,34 +31,34 @@ namespace Win32
 
         }
 
-        BitmapSharedPtr resize(int width, int height)
+        BitmapSharedPtr resize(size_t width, size_t height)
         {
-            HDC dcSrc = CreateCompatibleDC(NULL);
+            HDC dcSrc = CreateCompatibleDC(nullptr);
             SelectObject(dcSrc, fBitmap);
 
-            std::unique_ptr<std::uint8_t[]> emptyBuffer = std::make_unique<std::uint8_t[]>(width * height * 4);
+            std::unique_ptr<std::uint8_t[]> emptyBuffer = std::make_unique<std::uint8_t[]>( width * height * 4);
             memset(emptyBuffer.get(), 0, width * height * 4);
 
             BitmapBuffer buf;
             buf.bitsPerPixel = 32;
             buf.buffer = reinterpret_cast<std::byte*>(emptyBuffer.get());
-            buf.width = width;
-            buf.height = height;
-            buf.rowPitch = 4 * width;
+            buf.width = static_cast<uint32_t>(width);
+            buf.height = static_cast<uint32_t>(height);
+            buf.rowPitch = static_cast < uint32_t>(4 * width);
 
             BitmapSharedPtr resized = std::make_shared<Bitmap>(buf);
-            HDC dst = CreateCompatibleDC(NULL);
+            HDC dst = CreateCompatibleDC(nullptr);
             SelectObject(dst, resized->fBitmap);
             SetStretchBltMode(dst, STRETCH_HALFTONE);
             //SetBkMode(dst, TRANSPARENT);
-            int finalWidth = std::min<int>(width, GetBitmapHeader().biWidth);
-            int finalHeight = std::min<int>(height, GetBitmapHeader().biHeight);
+            size_t finalWidth = std::min<size_t>(width, static_cast<size_t>(GetBitmapHeader().biWidth));
+            size_t finalHeight = std::min<size_t>(height, static_cast<size_t>(GetBitmapHeader().biHeight));
 
             //blit image to the middle of the new image.
-            int posX = (width - finalWidth) / 2;
-            int posY = (height - finalHeight) / 2;
+            size_t posX = (width - finalWidth) / 2;
+            size_t posY = (height - finalHeight) / 2;
 
-            StretchBlt(dst, posX, posY, finalWidth, finalHeight, dcSrc, 0, 0, fBitmapInfo.bmiHeader.biWidth, fBitmapInfo.bmiHeader.biHeight, SRCCOPY);
+            StretchBlt(dst, posX, posY, static_cast<int>(finalWidth), static_cast<int>(finalHeight), dcSrc, 0, 0, fBitmapInfo.bmiHeader.biWidth, fBitmapInfo.bmiHeader.biHeight, SRCCOPY);
 
             DeleteDC(dcSrc);
             DeleteDC(dst);
@@ -105,8 +105,8 @@ namespace Win32
             const int bpp = bitmapBuffer.bitsPerPixel;
             const int rowPitch = bitmapBuffer.rowPitch;
 
-            BITMAPINFO bi;
-            bi.bmiHeader = {};
+            BITMAPINFO bi{};
+            
             bi.bmiHeader.biBitCount = bpp;
             bi.bmiHeader.biClrImportant = 0;
             bi.bmiHeader.biClrUsed = 0;
@@ -130,8 +130,8 @@ namespace Win32
 
             char* ppvBits;
 
-            HBITMAP hBitmap = CreateDIBSection(NULL, &bi, DIB_RGB_COLORS, (void**)&ppvBits, NULL, 0);
-            if (SetDIBits(NULL, hBitmap, 0, height, pPixels, &bi, DIB_RGB_COLORS) == 0)
+            HBITMAP hBitmap = CreateDIBSection(nullptr, &bi, DIB_RGB_COLORS, (void**)&ppvBits, nullptr, 0);
+            if (SetDIBits(nullptr, hBitmap, 0, height, pPixels, &bi, DIB_RGB_COLORS) == 0)
                 LL_EXCEPTION_SYSTEM_ERROR("can not set bitmap pixels");
             return hBitmap;
         }

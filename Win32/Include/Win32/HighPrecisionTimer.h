@@ -1,5 +1,5 @@
 #pragma once
-#include <windows.h>
+#include <Windows.h>
 #include <LLUtils/Exception.h>
 #include <LLUtils/Templates.h>
 
@@ -140,7 +140,7 @@ namespace Win32
     	}
         static VOID CALLBACK OnTimer(
             _In_ PVOID   lpParameter,
-            _In_ BOOLEAN TimerOrWaitFired
+            [[maybe_unused]] _In_ BOOLEAN TimerOrWaitFired
         )
         {
             auto _this = reinterpret_cast<HighPrecisionTimer*>(lpParameter);

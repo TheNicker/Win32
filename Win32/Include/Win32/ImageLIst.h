@@ -257,8 +257,8 @@ namespace Win32
             bi32.bmiColors[0] = rgb;
             bi32.bmiHeader = bihRGBA;
 
-            HBITMAP hBitmap = CreateDIBSection(NULL, &bi, DIB_RGB_COLORS, (void**)&ppvBits, NULL, 0);
-            SetDIBits(NULL, hBitmap, 0, bih.biHeight, pPixels, &bi, DIB_RGB_COLORS);
+            HBITMAP hBitmap = CreateDIBSection(nullptr, &bi, DIB_RGB_COLORS, (void**)&ppvBits, nullptr, 0);
+            SetDIBits(nullptr, hBitmap, 0, bih.biHeight, pPixels, &bi, DIB_RGB_COLORS);
 
             const uint8_t* pixels32 = new uint8_t[width * height * 4];
 
@@ -283,8 +283,8 @@ namespace Win32
                 destLine += width * 4;
             }
 
-            HBITMAP hBitmap32 = CreateDIBSection(NULL, &bi32, DIB_RGB_COLORS, (void**)&ppvBits, NULL, 0);
-            SetDIBits(NULL, hBitmap32, 0, bihRGBA.biHeight, pixels32, &bi32, DIB_RGB_COLORS);
+            HBITMAP hBitmap32 = CreateDIBSection(nullptr, &bi32, DIB_RGB_COLORS, (void**)&ppvBits, nullptr, 0);
+            SetDIBits(nullptr, hBitmap32, 0, bihRGBA.biHeight, pixels32, &bi32, DIB_RGB_COLORS);
 
             //GetObject(hBitmap, sizeof(BITMAP), &cBitmap);
             //return hBitmap32;

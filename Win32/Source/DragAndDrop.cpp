@@ -43,23 +43,26 @@ namespace Win32
 
     ULONG DragAndDropTarget::AddRef()
     {
-        return InterlockedIncrement(&m_cRef);
+        return static_cast<ULONG>(InterlockedIncrement(&m_cRef));
     }
 
     ULONG DragAndDropTarget::Release()
     {
-        LONG cRef = InterlockedDecrement(&m_cRef);
-        if (cRef == 0) delete this;
-        return cRef;
+        size_t cRef = InterlockedDecrement(&m_cRef);
+        if (cRef == 0) 
+            delete this;
+
+        return static_cast<ULONG>(cRef);
     }
 
-    HRESULT DragAndDropTarget::DragEnter(IDataObject* pdto, DWORD grfKeyState, POINTL ptl, DWORD* pdwEffect)
+    HRESULT DragAndDropTarget::DragEnter([[maybe_unused]] IDataObject* pdto, [[maybe_unused]] DWORD grfKeyState
+        , [[maybe_unused]] POINTL ptl, DWORD* pdwEffect)
     {
         *pdwEffect &= DROPEFFECT_COPY;
         return S_OK;
     }
 
-    HRESULT DragAndDropTarget::DragOver(DWORD grfKeyState, POINTL ptl, DWORD* pdwEffect)
+    HRESULT DragAndDropTarget::DragOver([[maybe_unused]] DWORD grfKeyState, [[maybe_unused]] POINTL ptl, DWORD* pdwEffect)
     {
         *pdwEffect &= DROPEFFECT_COPY;
         return S_OK;
@@ -70,7 +73,7 @@ namespace Win32
         return S_OK;
     }
 
-    HRESULT DragAndDropTarget::Drop(IDataObject* pdto, DWORD grfKeyState, POINTL ptl, DWORD* pdwEffect)
+    HRESULT DragAndDropTarget::Drop(IDataObject* pdto, [[maybe_unused]] DWORD grfKeyState, [[maybe_unused]] POINTL ptl, DWORD* pdwEffect)
     {
         OpenFilesFromDataObject(pdto);
         *pdwEffect &= DROPEFFECT_COPY;

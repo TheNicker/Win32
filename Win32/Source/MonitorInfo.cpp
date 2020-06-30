@@ -1,7 +1,7 @@
 #include <Win32/MonitorInfo.h>
 #include <algorithm>
 #include <string>
-#include <shellscalingapi.h>
+#include <ShellScalingApi.h>
 #include <LLUtils/StringDefs.h>
 #include <LLUtils/Templates.h>
 
@@ -18,7 +18,7 @@ namespace Win32
         mDisplayDevices.clear();
         mHMonitorToDesc.clear();
         DISPLAY_DEVICE disp;
-        disp.cb = sizeof(disp);;
+        disp.cb = sizeof(disp);
         DWORD devNum = 0;
         while (EnumDisplayDevices(nullptr, devNum++, &disp, 0) == TRUE)
         {
@@ -31,7 +31,7 @@ namespace Win32
                 EnumDisplaySettings(disp.DeviceName, ENUM_CURRENT_SETTINGS, &desc.DisplaySettings);
             }
         }
-        EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc, (LPARAM)this);
+        EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc, reinterpret_cast<LPARAM>(this));
     }
     //---------------------------------------------------------------------
     const MonitorDesc& MonitorInfo::getMonitorInfo(size_t monitorIndex, bool allowRefresh /*= false*/)
@@ -52,9 +52,10 @@ namespace Win32
 
     }
     //---------------------------------------------------------------------
-    BOOL CALLBACK MonitorInfo::MonitorEnumProc(_In_ HMONITOR hMonitor, _In_ HDC hdcMonitor, _In_ LPRECT lprcMonitor, _In_ LPARAM dwData)
+    BOOL CALLBACK MonitorInfo::MonitorEnumProc(_In_ HMONITOR hMonitor, _In_ [[maybe_unused]]  HDC hdcMonitor
+        , _In_ [[maybe_unused]] LPRECT lprcMonitor, _In_ LPARAM dwData)
     {
-        MonitorInfo* _this = (MonitorInfo*)dwData;
+        MonitorInfo* _this = reinterpret_cast<MonitorInfo*>(dwData);
         MONITORINFOEX monitorInfo;
         monitorInfo.cbSize = sizeof(monitorInfo);
         GetMonitorInfo(hMonitor, &monitorInfo);
@@ -68,8 +69,8 @@ namespace Win32
                 UINT dpix;
                 UINT dpiy;
                 GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpix, &dpiy);
-                desc.DPIx = dpix;
-                desc.DPIy = dpiy;
+                desc.DPIx = static_cast<uint16_t>(dpix);
+                desc.DPIy = static_cast<uint16_t>(dpiy);
 
                 _this->mHMonitorToDesc.insert(std::make_pair(hMonitor, desc));
                 break;
