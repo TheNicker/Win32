@@ -61,7 +61,7 @@ namespace Win32
         GetMonitorInfo(hMonitor, &monitorInfo);
         for (MonitorDesc& desc : _this->mDisplayDevices)
         {
-            if (LLUtils::native_string_type(desc.DisplayInfo.DeviceName) == LLUtils::native_string_type(desc.DisplayInfo.DeviceName))
+            if (LLUtils::native_string_type(monitorInfo.szDevice) == LLUtils::native_string_type(desc.DisplayInfo.DeviceName))
             {
                 desc.monitorInfo = monitorInfo;
                 desc.handle = hMonitor;
