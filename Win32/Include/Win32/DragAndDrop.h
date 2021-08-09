@@ -17,25 +17,25 @@ namespace Win32
         virtual ~DragAndDropTarget();
         void Detach();
         // *** IUnknown ***
-        STDMETHODIMP QueryInterface(REFIID riid, void** ppv);
+        STDMETHODIMP QueryInterface(REFIID riid, void** ppv) override;
 
-        STDMETHODIMP_(ULONG) AddRef();
+        STDMETHODIMP_(ULONG) AddRef() override;
 
-        STDMETHODIMP_(ULONG) Release();
+        STDMETHODIMP_(ULONG) Release() override;
 
 #pragma endregion
 #pragma region  IDropTarget
         // *** IDropTarget ***
         STDMETHODIMP DragEnter(IDataObject* pdto,
-            DWORD grfKeyState, POINTL ptl, DWORD* pdwEffect);
+            DWORD grfKeyState, POINTL ptl, DWORD* pdwEffect) override;
 
         STDMETHODIMP DragOver(DWORD grfKeyState,
-            POINTL ptl, DWORD* pdwEffect);
+            POINTL ptl, DWORD* pdwEffect) override;
 
-        STDMETHODIMP DragLeave();
+        STDMETHODIMP DragLeave() override;
 
         STDMETHODIMP Drop(IDataObject* pdto, DWORD grfKeyState,
-            POINTL ptl, DWORD* pdwEffect);
+            POINTL ptl, DWORD* pdwEffect) override;
 #pragma endregion
 
 

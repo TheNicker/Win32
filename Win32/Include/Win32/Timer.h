@@ -128,10 +128,10 @@ namespace Win32
 
 
     inline void TimerManager::Timerproc(
-        HWND hwnd,        // handle to window for timer messages 
-        UINT message,     // WM_TIMER message 
-        UINT idTimer,     // timer identifier 
-        DWORD dwTime)     // current system time
+        [[maybe_unused]] HWND hwnd,        // handle to window for timer messages 
+        [[maybe_unused]] UINT message,     // WM_TIMER message 
+                         UINT idTimer,     // timer identifier 
+        [[maybe_unused]] DWORD dwTime)     // current system time
     {
         TimerManager& _this = TimerManager::GetSingleton();
 

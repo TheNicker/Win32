@@ -4,6 +4,7 @@
 #include <ShellScalingApi.h>
 #include <LLUtils/StringDefs.h>
 #include <LLUtils/Templates.h>
+#include <LLUtils/PlatformUtility.h>
 
 namespace Win32
 {
@@ -15,8 +16,10 @@ namespace Win32
     //---------------------------------------------------------------------
     void MonitorInfo::Refresh()
     {
+        fBoundAreaOutOfDate = true;
         mDisplayDevices.clear();
         mHMonitorToDesc.clear();
+        fPrimaryMonitorIterator = mHMonitorToDesc.end();
         DISPLAY_DEVICE disp;
         disp.cb = sizeof(disp);
         DWORD devNum = 0;
@@ -42,6 +45,13 @@ namespace Win32
 		return monitorIndex < mDisplayDevices.size() ? mDisplayDevices[monitorIndex] : mEmptyMonitorDesc;
     }
     //---------------------------------------------------------------------
+    const MonitorDesc& MonitorInfo::GetPrimaryMonitor(bool allowRefresh)
+    {
+        if (allowRefresh)
+            Refresh();
+        return fPrimaryMonitorIterator->second;
+    }
+    //---------------------------------------------------------------------
     const MonitorDesc&  MonitorInfo::getMonitorInfo(HMONITOR hMonitor, bool allowRefresh )
     {
         if (allowRefresh)
@@ -51,6 +61,7 @@ namespace Win32
         return it == mHMonitorToDesc.end() ? mEmptyMonitorDesc : it->second;
 
     }
+  
     //---------------------------------------------------------------------
     BOOL CALLBACK MonitorInfo::MonitorEnumProc(_In_ HMONITOR hMonitor, _In_ [[maybe_unused]]  HDC hdcMonitor
         , _In_ [[maybe_unused]] LPRECT lprcMonitor, _In_ LPARAM dwData)
@@ -68,11 +79,30 @@ namespace Win32
 
                 UINT dpix;
                 UINT dpiy;
-                GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpix, &dpiy);
+                const static LLUtils::PlatformUtility::OSVersion versionInfo = LLUtils::PlatformUtility::GetOSVersion();
+                const static double windowsVersion = versionInfo.major + versionInfo.minor / 10.0;
+
+                
+                if (windowsVersion >= 6.3)
+                {
+                    GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpix, &dpiy);
+                }
+                else
+                {
+                    HWND desktopWindow = GetDesktopWindow();
+                    HDC hDC = ::GetDC(desktopWindow);
+                    dpix = static_cast<UINT>(::GetDeviceCaps(hDC, LOGPIXELSX));
+                    dpiy = static_cast<UINT>(::GetDeviceCaps(hDC, LOGPIXELSY));
+                    ::ReleaseDC(desktopWindow, hDC);
+                }
+
                 desc.DPIx = static_cast<uint16_t>(dpix);
                 desc.DPIy = static_cast<uint16_t>(dpiy);
 
-                _this->mHMonitorToDesc.insert(std::make_pair(hMonitor, desc));
+                auto it = _this->mHMonitorToDesc.insert(std::make_pair(hMonitor, desc));
+                
+                if ((monitorInfo.dwFlags & MONITORINFOF_PRIMARY) == MONITORINFOF_PRIMARY)
+                    _this->fPrimaryMonitorIterator = it.first;
                 break;
             }
         }
@@ -86,6 +116,16 @@ namespace Win32
     }
 
     RECT MonitorInfo::getBoundingMonitorArea()
+    {
+        if (fBoundAreaOutOfDate == true)
+        {
+            fBoundArea = getBoundingMonitorAreaInternal();
+            fBoundAreaOutOfDate = false;
+        }
+        return fBoundArea;
+    }
+
+    RECT MonitorInfo::getBoundingMonitorAreaInternal()
     {
         using namespace std;
         RECT rect {};

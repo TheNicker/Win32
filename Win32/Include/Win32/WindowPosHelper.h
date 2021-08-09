@@ -52,6 +52,7 @@ namespace Win32
             case WindowPosOp::Resize:
                 return BaseFlags & static_cast<uint32_t>(~SWP_NOSIZE);
             case WindowPosOp::Zorder:
+                return static_cast<uint32_t>(BaseFlags & static_cast<uint32_t>(~SWP_NOZORDER));
             case WindowPosOp::AlwaysOnTop:
                 return BaseFlags & static_cast<uint32_t>(~SWP_NOZORDER);
 

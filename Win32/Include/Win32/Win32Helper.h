@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <LLUtils/Point.h>
 #include <LLUtils/StringUtility.h>
+#include <ShlObj_core.h>
 #include <string>
 
 namespace Win32
@@ -96,6 +97,23 @@ namespace Win32
 
             return GetOpenFileName(&ofn) == TRUE ? LLUtils::native_string_type(filename) : LLUtils::native_string_type();
         }
+    	static void BrowseToFile(LLUtils::native_string_type filename)
+        {
+        	struct  Deletor
+        	{
+                LPITEMIDLIST pidl = nullptr;
+        		~Deletor()
+        		{
+                    ILFree(pidl);
+        		}
+                
+        	} deletor;
+
+        	deletor.pidl = ILCreateFromPath(filename.c_str());
+            if (deletor.pidl != nullptr)
+                SHOpenFolderAndSelectItems(deletor.pidl, 0, nullptr, 0);
+        }
+    	
     };
 }
 

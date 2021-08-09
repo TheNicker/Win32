@@ -56,6 +56,10 @@ namespace Win32
     class Win32Window
     {
     public:
+            static constexpr LLUtils::native_char_type WindowClassName[] = LLUTILS_TEXT("OIV_WINDOW_CLASS");
+        private:
+            static constexpr LLUtils::native_char_type WindowAddressPropertyName[] = LLUTILS_TEXT("windowClass");
+        public:
         // const methods
         void SetFocused() const;
         HWND GetHandle() const;
@@ -82,7 +86,7 @@ namespace Win32
         bool GetAlwaysOnTop() const;
 
 
-        virtual ~Win32Window();
+        virtual ~Win32Window() = default;
 
     public: // mutating methods
         void Create();
@@ -98,21 +102,24 @@ namespace Win32
         void Move(const int16_t delta_x, const int16_t delta_y);
         void SetMouseCursor(HCURSOR cursor);
         void SetEraseBackground(bool eraseBackground) { fEraseBackground = eraseBackground; }
+        void SetDestoryOnClose(bool destoryOnClose) {fDestroyOnClose = destoryOnClose;}
         void SetBackgroundColor(const LLUtils::Color color);
         void SetDoubleClickMode(DoubleClickMode doubleClickMode) { fDoubleClickMode = doubleClickMode; }
         void EnableDragAndDrop(bool enable);
         void SetLockMouseToWindowMode(LockMouseToWindowMode mode);
         void SetVisible(bool visible);
+        void SetForground();
         void SetWindowStyles(WindowStyle styles, bool enable);
         void SetParent(Win32Window* parent);
         void SetTransparent(bool transparent) { fIsTransparent = transparent; }
         void SetAlwaysOnTop(bool alwaysOnTop);
         void SetTitle(const std::wstring& title);
+        void SetWindowIcon(LPCTSTR iconPath);
 
 
     protected:
         bool RaiseEvent(const Event& evnt);
-        DWORD ComposeWindowStyles() const;
+        LONG ComposeWindowStyles() const;
 
     private: // const methods:
 
@@ -139,6 +146,7 @@ namespace Win32
         WINDOWPLACEMENT fLastWindowPlacement{};
         Microsoft::WRL::ComPtr<DragAndDropTarget> fDragAndDrop;
         bool fEraseBackground = true;
+        bool fDestroyOnClose = true;
         DoubleClickMode fDoubleClickMode = DoubleClickMode::NotSet;
         friend DragAndDropTarget;
         LockMouseToWindowMode fLockMouseToWindowMode = LockMouseToWindowMode::NoLock;
@@ -149,6 +157,5 @@ namespace Win32
         bool fAlwaysOnTop = false;
         LLUtils::Color fBackgroundColor = LLUtils::Colors::White;
         HBRUSH fBackgroundCachedBrush = CreateSolidBrush(fBackgroundColor.colorValue);
-        bool fIsDestroyed = false;
     };
 }

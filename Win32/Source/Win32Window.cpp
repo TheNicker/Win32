@@ -67,24 +67,16 @@ namespace Win32
     void Win32Window::Create()
     {
         HINSTANCE hInstance = GetModuleHandle(nullptr);
-        // The main window class name.
-        static TCHAR szWindowClass[] = _T("OIV_WINDOW_CLASS");
 
         // The string that appears in the application's title bar.
-        WNDCLASSEX wcex;
+        WNDCLASSEX wcex{};
 
         wcex.cbSize = sizeof(WNDCLASSEX);
-        wcex.style = 0;
         wcex.lpfnWndProc = WndProc;
-        wcex.cbClsExtra = 0;
-        wcex.cbWndExtra = 0;
         wcex.hInstance = hInstance;
-        wcex.hIcon = nullptr; // LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
         wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
         wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
-        wcex.lpszMenuName = nullptr;
-        wcex.lpszClassName = szWindowClass;
-        wcex.hIconSm = nullptr;// LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+        wcex.lpszClassName = WindowClassName;
         static bool classRegistered = false;
         if (classRegistered == false)
         {
@@ -107,7 +99,7 @@ namespace Win32
         HWND handleWindow =
 
             CreateWindow(
-                szWindowClass,
+                WindowClassName,
                 nullptr, // title;
                 0,
                 CW_USEDEFAULT,
@@ -132,8 +124,6 @@ namespace Win32
                 MB_OK);
 
         }
-        fMouseCursor = ::LoadCursor(nullptr, IDC_ARROW);
-         
     }
 
 
@@ -144,12 +134,15 @@ namespace Win32
         for (auto& child : fChildren)
             child->SetVisible(false);
 
-        for (auto& child : fChildren)
+        //Create a temporary list of children so fChildren won't get validated.
+        decltype(fChildren) copyOfChildren = fChildren;
+
+        for (auto& child : copyOfChildren)
+        {
             child->Destroy();
-
-        ::DestroyWindow(GetHandle());
+            ::DestroyWindow(GetHandle());
+        }
     }
-
 
 
 
@@ -191,7 +184,7 @@ namespace Win32
     bool Win32Window::IsMouseCursorInClientRect() const
     {
         RECT rect = GetClientRectangle();
-        return LLUtils::RectI32({ rect.bottom,rect.left }, { rect.top,rect.right }).IsInside(GetMousePosition());
+        return LLUtils::RectI32({ rect.left ,rect.top,}, { rect.right,rect.bottom}).IsInside(GetMousePosition());
     }
 
     void Win32Window::SetWindowed()
@@ -215,9 +208,9 @@ namespace Win32
 
 
 
-    DWORD Win32Window::ComposeWindowStyles() const
+    LONG Win32Window::ComposeWindowStyles() const
     {
-        DWORD currentStyles = 0
+        LONG currentStyles = 0
             | (WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
             | (GetVisible() ? WS_VISIBLE : 0)
             ;
@@ -367,7 +360,7 @@ namespace Win32
         case FullSceenState::MultiScreen:
             SetFullScreen(true);
             break;
-        case FullSceenState::Default:
+        case FullSceenState::None:
         default:
             LL_EXCEPTION_UNEXPECTED_VALUE;
     	}
@@ -389,7 +382,7 @@ namespace Win32
         case FullSceenState::MultiScreen:
             SetWindowed();
             break;
-        case FullSceenState::Default:
+        case FullSceenState::None:
         default:
             LL_EXCEPTION_UNEXPECTED_VALUE;
         }
@@ -450,6 +443,10 @@ namespace Win32
         }
     }
 
+        void Win32Window::SetForground()
+        {
+            ::SetForegroundWindow(GetHandle());
+        }
     LLUtils::PointI32 Win32Window::GetWindowSize() const
     {
         RECT r;
@@ -491,12 +488,15 @@ namespace Win32
             }
             break;
         case WM_SETCURSOR:
-            //if (GetMouseCursor() != nullptr)
+        {
+            if (GetMouseCursor() != nullptr)
             {
                 ::SetCursor(fMouseCursor);
                 retValue = 1;
                 defaultProc = false;
             }
+
+        }
             break;
         case WM_MENUCHAR:
             if (GetEnableMenuChar() == false)
@@ -584,21 +584,10 @@ namespace Win32
         }
 
 
-        Win32Window* window = reinterpret_cast<Win32Window*>(GetProp(hWnd, _T("windowClass")));
+            Win32Window* window = reinterpret_cast<Win32Window*>(GetProp(hWnd, WindowAddressPropertyName));
         if (window != nullptr)
-        {
-            if (message == WM_DESTROY)
-            {
-                auto prop = GetProp(window->fHandleWindow, _T("windowClass"));
-                if (prop != nullptr)
-                    RemoveProp(window->fHandleWindow, _T("windowClass"));
-
-                window->fIsDestroyed = true;
-
-            }
-
             return window->WindowProc({ hWnd,message,wParam,lParam });
-        }
+        
 
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -652,15 +641,12 @@ namespace Win32
         WindowPosHelper::SetPlacement(GetHandle(), x, y, width, height);
     }
 
-    Win32Window::~Win32Window()
+    void Win32Window::SetWindowIcon(LPCTSTR iconPath)
     {
-        if (fIsDestroyed == false)
-        {
-            //Windows didn't get destroy properly
-            auto prop = GetProp(fHandleWindow, _T("windowClass"));
-            if (prop != nullptr)
-                RemoveProp(fHandleWindow, _T("windowClass"));
-        }
+        auto hWindowIcon = LoadIcon(GetModuleHandle(nullptr), iconPath);
 
+        SendMessage(WM_SETICON, ICON_BIG  , reinterpret_cast<LPARAM>(hWindowIcon));
+        SendMessage(WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hWindowIcon));
     }
+
 }

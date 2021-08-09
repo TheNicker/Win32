@@ -3,7 +3,7 @@ namespace Win32
 {
     enum class FullSceenState
     { 
-          Default
+          None
         , Windowed
         , SingleScreen
         , MultiScreen
