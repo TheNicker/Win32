@@ -70,13 +70,15 @@ namespace Win32
             NOTIFYICONIDENTIFIER iconIdentifer{ static_cast<DWORD>(sizeof(NOTIFYICONIDENTIFIER)), fWindow.GetHandle(),static_cast<UINT>(iconid), GUID{} };
             RECT rect;
 
-            if (Shell_NotifyIconGetRect(&iconIdentifer, &rect) == S_OK) [[likely]]
+            if (Shell_NotifyIconGetRect(&iconIdentifer, &rect) == S_OK)
             {
+                [[likely]];
                 using type = LLUtils::Rect<uint16_t>::Point_Type::point_type;
                 return {LLUtils::Rect<uint16_t>::Point_Type {static_cast<type>(rect.left), static_cast<type>( rect.top) } ,{static_cast<type>(rect.right), static_cast<type>(rect.bottom)}};
             }
-            else [[unlikely]]
+            else 
             {
+                [[unlikely]];
                 LL_EXCEPTION(LLUtils::Exception::ErrorCode::NotFound, "Icon id not found");
             }
         }
