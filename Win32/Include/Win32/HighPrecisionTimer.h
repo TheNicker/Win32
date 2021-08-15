@@ -45,6 +45,10 @@ namespace Win32
             fDueTime = dueTime;
         }
 
+        bool GetEnabled() const
+        {
+            return fEnabled;
+        }
 
         void Enable(bool enable)
         {
