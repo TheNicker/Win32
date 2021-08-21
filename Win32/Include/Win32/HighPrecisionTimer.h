@@ -109,13 +109,18 @@ namespace Win32
       
         void ExecuteTimerFunc()
         {
-            if (fRepeatInterval == INFINITE)
-                fEnabled = false;
-
             SendMessage(fWindowHandle, ON_TIMER_MESSAGE, reinterpret_cast<WPARAM>(this), 0);
         }
 
-
+        void ExecuteTimerFuncThreadSafe()
+        {
+            if (fEnabled == true)
+            {
+                fCallback();
+                if (fRepeatInterval == INFINITE)
+                    fEnabled = false;
+            }
+        }
 
         static
             LRESULT CALLBACK WindProc(
@@ -127,13 +132,16 @@ namespace Win32
             switch (Msg)
             {
             case ON_TIMER_MESSAGE:
-                reinterpret_cast<HighPrecisionTimer*>(wParam)->fCallback();
+            {
+
+                reinterpret_cast<HighPrecisionTimer*>(wParam)->ExecuteTimerFuncThreadSafe();
                 return 0;
                 break;
             default:
                 return DefWindowProc(hWnd, Msg, wParam, lParam);
             }
 
+            }
         }
 
 #pragma region Windowed timer begin
