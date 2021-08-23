@@ -505,7 +505,13 @@ namespace Win32
                 retValue = MAKELONG(0, MNC_CLOSE);
             }
             break;
-
+        case WM_SYSKEYDOWN: // Disable keyboard handling of the alt key of the menu char
+            if (GetEnableMenuChar() == false && message.wParam == VK_MENU)
+            {
+                defaultProc = false;
+                retValue = 0;
+            }
+            break;
         case WM_NCLBUTTONDBLCLK:
 
             switch (GetDoubleClickMode())
