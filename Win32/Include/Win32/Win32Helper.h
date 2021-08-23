@@ -13,13 +13,11 @@ namespace Win32
         static bool IsKeyPressed(DWORD virtualKey)
         {
             return (GetKeyState(static_cast<int>(virtualKey)) & static_cast<USHORT>(0x8000)) != 0;
-
         }
 
         static bool IsKeyToggled(DWORD virtualKey)
         {
             return (GetKeyState(static_cast<int>(virtualKey)) & static_cast<USHORT>(0x0001)) != 0;
-
         }
 
         static bool ProcessApplicationMessage()

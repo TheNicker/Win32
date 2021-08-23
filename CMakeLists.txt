@@ -6,6 +6,8 @@ include_directories("./Win32/Include")
 include_directories("./Win32/source")
 include_directories(./External/LLUtils/Include)
 
+option(WIN32_LIB_BUILD_SAMPLES "build win32 samples" ON)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     #enabled warnings flags
     add_compile_options(-Wextra -Wpedantic -Wall -Wpessimizing-move)
@@ -23,4 +25,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 
 add_subdirectory("Win32")
-add_subdirectory("Example")
+
+if (WIN32_LIB_BUILD_SAMPLES)
+    add_subdirectory("Example")
+endif()
