@@ -559,8 +559,6 @@ namespace Win32
                 break;
             }
             break;
-        case WM_CLOSE:
-            break;
         }
 
         EventWinMessage winEvent;
@@ -601,9 +599,7 @@ namespace Win32
     POINT Win32Window::GetMousePosition() const
     {
         return Win32Helper::GetMouseCursorPosition(GetHandle());
-
     }
-
 
     SIZE Win32Window::GetClientSize() const
     {
@@ -616,7 +612,6 @@ namespace Win32
         GetClientRect(GetHandle(), &rect);
         return rect;
     }
-
 
     bool Win32Window::RaiseEvent(const Event& evnt)
     {
