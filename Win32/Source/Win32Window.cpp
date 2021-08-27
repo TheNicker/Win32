@@ -58,9 +58,9 @@ namespace Win32
         }
     }
 
-    void Win32Window::SetTitle(const std::wstring& title)
+    void Win32Window::SetTitle(const LLUtils::native_string_type& title)
     {
-        SetWindowTextW(GetHandle(), title.c_str());
+        SetWindowText(GetHandle(), title.c_str());
     }
 
 
@@ -250,9 +250,6 @@ namespace Win32
             UpdateWindowStyles();
             WindowPosHelper::UpdateFrame(GetHandle());
         }
-
-
-
     }
 
     void Win32Window::SetMouseCursor(HCURSOR cursor)
@@ -274,10 +271,9 @@ namespace Win32
                 DeleteObject(fBackgroundCachedBrush);
                 fBackgroundCachedBrush = nullptr;
             }
-            LLUtils::Color removeAlpha = fBackgroundColor;
-            removeAlpha.A = 0;
 
-            fBackgroundCachedBrush = CreateSolidBrush(removeAlpha.colorValue);
+            fBackgroundCachedBrush = CreateSolidBrush(RGB(fBackgroundColor.R(), fBackgroundColor.G()
+                , fBackgroundColor.B()));
         }
     }
 

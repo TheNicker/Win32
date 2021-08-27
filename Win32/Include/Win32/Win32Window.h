@@ -46,8 +46,7 @@ namespace Win32
     };
 
     LLUTILS_DEFINE_ENUM_CLASS_FLAG_OPERATIONS(WindowStyle)
-
-        using WindowStyleFlags = LLUtils::BitFlags<WindowStyle>;
+    using WindowStyleFlags = LLUtils::BitFlags<WindowStyle>;
 
     class Win32Window;
 
@@ -113,7 +112,7 @@ namespace Win32
         void SetParent(Win32Window* parent);
         void SetTransparent(bool transparent) { fIsTransparent = transparent; }
         void SetAlwaysOnTop(bool alwaysOnTop);
-        void SetTitle(const std::wstring& title);
+        void SetTitle(const LLUtils::native_string_type& title);
         void SetWindowIcon(LPCTSTR iconPath);
 
 
@@ -156,6 +155,6 @@ namespace Win32
         bool fIsTransparent = false;
         bool fAlwaysOnTop = false;
         LLUtils::Color fBackgroundColor = LLUtils::Colors::White;
-        HBRUSH fBackgroundCachedBrush = CreateSolidBrush(fBackgroundColor.colorValue);
+        HBRUSH fBackgroundCachedBrush = CreateSolidBrush(RGB(fBackgroundColor.R(), fBackgroundColor.G(), fBackgroundColor.B()));
     };
 }
