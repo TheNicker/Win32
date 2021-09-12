@@ -390,6 +390,13 @@ namespace Win32
             fDragAndDrop->Detach();
     }
 
+    LLUtils::PointI32 Win32Window::GetPosition() const
+    {
+        WINDOWPLACEMENT placement;
+        GetWindowPlacement(fHandleWindow, &placement);
+        return { placement.rcNormalPosition.left, placement.rcNormalPosition.top };
+    }
+
 
     LRESULT Win32Window::GetCorner(const POINTS& points) const
     {

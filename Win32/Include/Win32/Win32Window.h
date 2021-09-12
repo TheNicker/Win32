@@ -83,6 +83,7 @@ namespace Win32
         bool GetTransparent() const { return fIsTransparent; }
         Win32Window* GetParent() const { return fParent; }
         bool GetAlwaysOnTop() const;
+        LLUtils::PointI32 GetPosition() const;
 
 
         virtual ~Win32Window() = default;
