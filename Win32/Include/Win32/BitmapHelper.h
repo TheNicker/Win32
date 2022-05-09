@@ -164,8 +164,9 @@ namespace Win32
             is.seekg(0, std::ios::end);
             size_t length = is.tellg();
             is.seekg(0, std::ios::beg);
-            char* pBuffer = new char[length];
-            is.read(pBuffer, length);
+            
+            auto pBuffer = std::make_unique<char[]>(length);
+            is.read(pBuffer.get(), length);
             is.close();
 
             auto nativeStringFilePath = LLUtils::StringUtility::ToNativeString(filePath);
