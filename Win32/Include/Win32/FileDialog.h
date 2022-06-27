@@ -4,6 +4,7 @@
 #include <memory>
 #include <Windows.h>
 #include <ShlObj.h>
+#include <LLUtils/Warnings.h>
 
 namespace Win32
 {
@@ -137,7 +138,10 @@ namespace Win32
         
             if (SUCCEEDED(hr))
             {
+LLUTILS_DISABLE_WARNING_PUSH
+LLUTILS_DISABLE_WARNING_LANGUAGE_EXTENSION
                 hr = CoCreateInstance(dialogClassID, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd));
+LLUTILS_DISABLE_WARNING_POP
                 if (SUCCEEDED(hr))
                 {
                     // Create an event handling object, and hook it up to the dialog.
