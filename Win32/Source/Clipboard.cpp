@@ -1,5 +1,6 @@
 #include <Win32/Clipboard.h>
 #include <LLUtils/StringUtility.h>
+#include <LLUtils/StopWatch.h>
 #include <LLUtils/Exception.h>
 #include <string_view>
 #include <Windows.h>
@@ -18,14 +19,15 @@ namespace Win32
         return formatID;
     }
 
-    void Clipboard::SetClipboardData(ClipboardFormatType format, const LLUtils::Buffer& data)
+    ClipboardResult Clipboard::SetClipboardData(ClipboardFormatType format, const LLUtils::Buffer& data)
     {
-        SetClipboardData(format, data.data(), data.size());
+        return SetClipboardData(format, data.data(), data.size());
     }
 
-    void Clipboard::SetClipboardData(ClipboardFormatType format, const std::byte* data, size_t size)
+    ClipboardResult Clipboard::SetClipboardData(ClipboardFormatType format, const std::byte* data, size_t size)
     {
         HANDLE handle = GlobalAlloc(GHND, size);
+        ClipboardResult result = ClipboardResult::UnknownError;
         if (handle != nullptr && handle != INVALID_HANDLE_VALUE)
         {
             // lock memory and get pointer to it
@@ -39,68 +41,96 @@ namespace Win32
             if (GlobalUnlock(handle) > 0 && GetLastError() != NO_ERROR)
                 LL_EXCEPTION_SYSTEM_ERROR("Can't unlock global memory.");
 
-            if (SetClipboardData(format, handle) == false)
+            result = SetClipboardData(format, handle);
+
+            if (result != ClipboardResult::Success)
             {
+                // If cannot set clipboard data, free handle.
                 if (GlobalFree(handle) != nullptr)
                     LL_EXCEPTION_SYSTEM_ERROR("Can't free global handle");
             }
         }
+        return result;
     }
 
-    void Clipboard::SetClipboardText(const wchar_t* text)
+    ClipboardResult Clipboard::SetClipboardText(const wchar_t* text)
     {
         std::wstring_view strView(text);
-        SetClipboardData(CF_UNICODETEXT
+        auto result = SetClipboardData(CF_UNICODETEXT
             , reinterpret_cast<const std::byte*>(text)
             , (strView.length() + 1) * sizeof(wchar_t));
 
 
-        std::string ansi = LLUtils::StringUtility::ConvertString<std::string>(text);
-
-        SetClipboardData(CF_TEXT
-            , reinterpret_cast<const std::byte*>(ansi.data())
-            , (ansi.length() + 1) * sizeof(char));
-
-
-    }
-
-    void Clipboard::SetClipboardText(const char* text)
-    {
-        std::string_view strView(text);
-        SetClipboardData(CF_TEXT
-            , reinterpret_cast<const std::byte*>(text)
-            , (strView.length() + 1) * sizeof(char));
-
-
-        std::wstring unicode = LLUtils::StringUtility::ConvertString<std::wstring>(text);
-
-        SetClipboardData(CF_UNICODETEXT
-            , reinterpret_cast<const std::byte*>(unicode.data())
-            , (unicode.length() + 1) * sizeof(wchar_t));
-
-    }
-
-    bool Clipboard::SetClipboardData(ClipboardFormatType format, HANDLE data)
-    {
-
-        if (::OpenClipboard(nullptr))
+        if (result == ClipboardResult::Success)
         {
-            if (::SetClipboardData(format, data) == nullptr)
-                LL_EXCEPTION_SYSTEM_ERROR("Unable to set clipboard data.");
+
+            std::string ansi = LLUtils::StringUtility::ConvertString<std::string>(text);
+
+            result = SetClipboardData(CF_TEXT
+                , reinterpret_cast<const std::byte*>(ansi.data())
+                , (ansi.length() + 1) * sizeof(char));
+        }
 
 
-            if (CloseClipboard() == FALSE)
-                LL_EXCEPTION_SYSTEM_ERROR("can not close clipboard.");
+        return result;
 
-            return true;
+    }
 
+    ClipboardResult Clipboard::SetClipboardText(const char* text)
+    {
+        return SetClipboardText(LLUtils::StringUtility::ToWString(text).c_str());
+    }
+
+    ClipboardResult Clipboard::GetClipboardError() const
+    {
+        auto lastError = GetLastError();
+        switch (lastError)
+        {
+        case ERROR_ACCESS_DENIED:
+            return ClipboardResult::AccessDenied;
+            break;
+        default:
+            return ClipboardResult::UnknownError;
+        }
+    }
+    
+
+    ClipboardResult Clipboard::SetClipboardData(ClipboardFormatType format, HANDLE data)
+    {
+        /*constexpr auto openClipboardSpinTime = 3000; 
+        LLUtils::StopWatch stopwatch(true);*/
+
+        ClipboardResult result = ClipboardResult::UnknownError;
+        BOOL clipboardResult;
+        //If can not open clipboard, try spinning for 'openClipboardSpinTime' 
+        /*while ( (clipboardResult = ::OpenClipboard(nullptr)) == 0 || stopwatch.GetElapsedTimeInteger(LLUtils::StopWatch::TimeUnit::Milliseconds) >= openClipboardSpinTime)
+        {
+            std::this_thread::yield();
+        }*/
+
+        clipboardResult = ::OpenClipboard(nullptr);
+
+        if (clipboardResult == 0)
+        {
+            result = GetClipboardError();
         }
         else
         {
-            LL_EXCEPTION_SYSTEM_ERROR("Can not open clipboard.");
+            if (::SetClipboardData(format, data) != nullptr)
+            {
+                if (CloseClipboard() == FALSE)
+                    LL_EXCEPTION_SYSTEM_ERROR("can not close clipboard.");
+
+                result = ClipboardResult::Success;
+            }
+            else
+            {
+                result = GetClipboardError();
+            }
         }
 
-        return false;
+        return result;
+
     }
 
     ClipboardData Clipboard::GetClipboardData()
