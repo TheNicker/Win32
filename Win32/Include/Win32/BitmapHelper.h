@@ -63,7 +63,7 @@ namespace Win32
             size_t posX = (width - finalWidth) / 2;
             size_t posY = (height - finalHeight) / 2;
 
-            StretchBlt(dst, posX, posY, static_cast<int>(finalWidth), static_cast<int>(finalHeight), dcSrc, 0, 0, fBitmapInfo.bmiHeader.biWidth, fBitmapInfo.bmiHeader.biHeight, SRCCOPY);
+            StretchBlt(dst, static_cast<int>(posX), static_cast<int>(posY), static_cast<int>(finalWidth), static_cast<int>(finalHeight), dcSrc, 0, 0, fBitmapInfo.bmiHeader.biWidth, fBitmapInfo.bmiHeader.biHeight, SRCCOPY);
 
             DeleteDC(dcSrc);
             DeleteDC(dst);
