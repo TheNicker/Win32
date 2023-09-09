@@ -167,8 +167,8 @@ namespace Win32
                         buffer.Allocate(size);
                         buffer.Write(reinterpret_cast<const std::byte*>(clipboardBuffer), 0, size);
                         std::get<ClipboardFormatType>(result) = selectedFormatID;
+                        GlobalUnlock(clipboardBuffer);
                     }
-                    GlobalUnlock(clipboardBuffer);
                 }
                 CloseClipboard();
             }
