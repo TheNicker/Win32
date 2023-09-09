@@ -151,8 +151,13 @@ namespace Win32
             char* ppvBits;
 
             HBITMAP hBitmap = CreateDIBSection(nullptr, &bi, DIB_RGB_COLORS, (void**)&ppvBits, nullptr, 0);
+            
+            if (hBitmap == nullptr)
+                LL_EXCEPTION_SYSTEM_ERROR("unable to allocate bitmap");
+
             if (SetDIBits(nullptr, hBitmap, 0, height, pPixels, &bi, DIB_RGB_COLORS) != height)
                 LL_EXCEPTION_SYSTEM_ERROR("can not set bitmap pixels");
+            
             return hBitmap;
         }
 

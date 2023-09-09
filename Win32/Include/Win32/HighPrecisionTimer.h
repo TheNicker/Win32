@@ -24,7 +24,7 @@ namespace Win32
             UnregisterWindow();
         
             if (fTimerID != nullptr)
-                DeleteTimerQueueTimer(nullptr, fTimerID, INVALID_HANDLE_VALUE);
+               std::ignore = DeleteTimerQueueTimer(nullptr, fTimerID, INVALID_HANDLE_VALUE);
         }
 
         void SetRepeatInterval(DWORD repeatInterval)

@@ -392,7 +392,7 @@ namespace Win32
 
     LLUtils::PointI32 Win32Window::GetPosition() const
     {
-        WINDOWPLACEMENT placement;
+        WINDOWPLACEMENT placement{};
         GetWindowPlacement(fHandleWindow, &placement);
         return { placement.rcNormalPosition.left, placement.rcNormalPosition.top };
     }
@@ -586,7 +586,7 @@ namespace Win32
         {
             CREATESTRUCT* s = reinterpret_cast<CREATESTRUCT*>(lParam);
             if (SetProp(hWnd, _T("windowClass"), s->lpCreateParams) == 0)
-                std::exception("Unable to set window property");
+                LL_EXCEPTION(LLUtils::Exception::ErrorCode::InvalidState, "Unable to set window property.");
             reinterpret_cast<Win32Window*>(s->lpCreateParams)->fHandleWindow = hWnd;
         }
 
