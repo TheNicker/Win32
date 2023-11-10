@@ -19,7 +19,7 @@ namespace Win32
         nid.uID = static_cast<UINT>(iconId);
         nid.uCallbackMessage = WM_PRIVATE_NOTIFICATION_CALLBACK_MESSAGE_ID;
 
-        LLUtils::StringUtility::StrCpy(nid.szTip, LLUtils::array_length(nid.szTip), tooltip.c_str());
+        LLUtils::StringUtility::StrCpy(nid.szTip, tooltip.c_str(), LLUtils::array_length(nid.szTip));
         
         nid.hIcon = LoadIcon(GetModuleHandle(nullptr), MakeIntResource(IconName));
         
