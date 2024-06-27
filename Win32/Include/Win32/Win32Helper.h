@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include <LLUtils/Point.h>
 #include <LLUtils/StringUtility.h>
-#include <ShlObj_core.h>
 #include <string>
 
 namespace Win32

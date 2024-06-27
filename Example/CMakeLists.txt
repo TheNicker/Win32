@@ -8,7 +8,7 @@ if(NOT TARGET Win32Example)
 	# Add source to this project's executable.
 	add_executable (Win32Example "Example.cpp")
 
-	target_link_libraries(Win32Example Win32 Shcore)
+	target_link_libraries(Win32Example Win32 shcore)
 
 	if(MSVC)
 	  #target_compile_options(Win32Example PRIVATE /W4 /WX)

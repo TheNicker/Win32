@@ -165,7 +165,7 @@ namespace Win32
         static HBITMAP FromFileAnyFormat(const std::wstring& filePath)
         {
             std::ifstream is;
-            is.open(filePath, std::ios::binary);
+            is.open(filePath.c_str(), std::ios::binary);
             is.seekg(0, std::ios::end);
             size_t length = is.tellg();
             is.seekg(0, std::ios::beg);
