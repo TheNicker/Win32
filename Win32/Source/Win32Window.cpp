@@ -30,7 +30,6 @@ namespace Win32
         SetParent(nullptr);
     }
 
-
     void Win32Window::SetParent(Win32Window* parent)
     {
         if (parent != fParent)
@@ -38,14 +37,12 @@ namespace Win32
             if (fParent != nullptr)
                 fParent->RemoveChild(this);
 
-
             fParent = parent;
             if (fParent != nullptr)
                 fParent->AddChild(this);
 
             SetWindowStyles(WindowStyle::ChildWindow, parent != nullptr);
             ::SetParent(GetHandle(), fParent != nullptr ? parent->GetHandle() : nullptr);
-
         }
     }
 
@@ -63,7 +60,6 @@ namespace Win32
         SetWindowText(GetHandle(), title.c_str());
     }
 
-
     void Win32Window::Create()
     {
         HINSTANCE hInstance = GetModuleHandle(nullptr);
@@ -80,14 +76,9 @@ namespace Win32
         static bool classRegistered = false;
         if (classRegistered == false)
         {
-
             if (RegisterClassEx(&wcex) == false)
             {
-                MessageBox(nullptr,
-                    _T("Call to RegisterClassEx failed!"),
-                    _T("Win32 Guided Tour"),
-                    MB_OK);
-
+                MessageBox(nullptr, _T("Call to RegisterClassEx failed!"), _T("Win32 Guided Tour"), MB_OK);
             }
 
             classRegistered = true;
@@ -95,46 +86,29 @@ namespace Win32
 
         // fHandleWindow is set in WM_CREATE
 
-
         HWND handleWindow =
 
-            CreateWindow(
-                WindowClassName,
-                nullptr, // title;
-                0,
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                1200,
-                800,
-                nullptr,
-                nullptr,
-                hInstance,
-                this
-            );
-
+            CreateWindow(WindowClassName,
+                         nullptr,  // title;
+                         0, CW_USEDEFAULT, CW_USEDEFAULT, 1200, 800, nullptr, nullptr, hInstance, this);
 
         if (handleWindow == nullptr)
             LL_EXCEPTION_SYSTEM_ERROR("window creation failed");
 
         if (!fHandleWindow)
         {
-            MessageBox(nullptr,
-                _T("Call to CreateWindow failed!"),
-                _T("Win32 Guided Tour"),
-                MB_OK);
-
+            MessageBox(nullptr, _T("Call to CreateWindow failed!"), _T("Win32 Guided Tour"), MB_OK);
         }
     }
 
-
     void Win32Window::Destroy()
     {
-        // Destroy, but hide self and children first, for clean visuals. 
+        // Destroy, but hide self and children first, for clean visuals.
         SetVisible(false);
         for (auto& child : fChildren)
             child->SetVisible(false);
 
-        //Create a temporary list of children so fChildren won't get validated.
+        // Create a temporary list of children so fChildren won't get validated.
         decltype(fChildren) copyOfChildren = fChildren;
 
         for (auto& child : copyOfChildren)
@@ -143,9 +117,6 @@ namespace Win32
             ::DestroyWindow(GetHandle());
         }
     }
-
-
-
 
     void Win32Window::SetLockMouseToWindowMode(LockMouseToWindowMode mode)
     {
@@ -170,10 +141,7 @@ namespace Win32
     void Win32Window::RemoveEventListener(EventCallback callback)
     {
         fListeners.erase(std::remove_if(fListeners.begin(), fListeners.end(), [&](const EventCallback& elem)
-            {
-                return LLUtils::getAddress(callback) == LLUtils::getAddress(elem);
-            }));
-
+                                        { return LLUtils::getAddress(callback) == LLUtils::getAddress(elem); }));
     }
 
     bool Win32Window::IsInFocus() const
@@ -184,7 +152,13 @@ namespace Win32
     bool Win32Window::IsMouseCursorInClientRect() const
     {
         RECT rect = GetClientRectangle();
-        return LLUtils::RectI32({ rect.left ,rect.top,}, { rect.right,rect.bottom}).IsInside(GetMousePosition());
+        return LLUtils::RectI32(
+                   {
+                       rect.left,
+                       rect.top,
+                   },
+                   {rect.right, rect.bottom})
+            .IsInside(GetMousePosition());
     }
 
     void Win32Window::SetWindowed()
@@ -199,25 +173,18 @@ namespace Win32
         GetWindowPlacement(fHandleWindow, &fLastWindowPlacement);
     }
 
-
     void Win32Window::RestorePlacement()
     {
         SetWindowPlacement(fHandleWindow, &fLastWindowPlacement);
     }
 
-
-
-
     LONG Win32Window::ComposeWindowStyles() const
     {
-        LONG currentStyles = 0
-            | (WS_CLIPCHILDREN | WS_CLIPSIBLINGS)
-            | (GetVisible() ? WS_VISIBLE : 0)
-            ;
-
+        LONG currentStyles = 0 | (WS_CLIPCHILDREN | WS_CLIPSIBLINGS) | (GetVisible() ? WS_VISIBLE : 0);
 
         if (GetFullScreenState() == FullSceenState::Windowed)
         {
+            // clang-format off
             currentStyles |= 0
                 | (fWindowStyles.test(WindowStyle::ChildWindow) ? WS_CHILD : 0)
                 | (fWindowStyles.test(WindowStyle::Caption) ? WS_CAPTION : 0)
@@ -226,10 +193,10 @@ namespace Win32
                 | (fWindowStyles.test(WindowStyle::MaximizeButton) ? WS_SYSMENU | WS_CAPTION | WS_MAXIMIZEBOX : 0)
                 | (fWindowStyles.test(WindowStyle::ResizableBorder) ? WS_SIZEBOX : 0)
                 ;
+            // clang-format on
         }
 
         return currentStyles;
-
     }
 
     bool Win32Window::IsUnderMouseCursor() const
@@ -272,8 +239,8 @@ namespace Win32
                 fBackgroundCachedBrush = nullptr;
             }
 
-            fBackgroundCachedBrush = CreateSolidBrush(RGB(fBackgroundColor.R(), fBackgroundColor.G()
-                , fBackgroundColor.B()));
+            fBackgroundCachedBrush = CreateSolidBrush(
+                RGB(fBackgroundColor.R(), fBackgroundColor.G(), fBackgroundColor.B()));
         }
     }
 
@@ -307,15 +274,16 @@ namespace Win32
 
     void Win32Window::UpdateWindowStyles()
     {
-        //Set styles, Need to call SetWindowPos with the appropriate flags after changing window styles.
+        // Set styles, Need to call SetWindowPos with the appropriate flags after changing window styles.
         SetWindowLong(GetHandle(), GWL_STYLE, ComposeWindowStyles());
     }
-
 
     void Win32Window::SetFullScreen(bool multiMonitor)
     {
         MonitorInfo::GetSingleton().Refresh();
-        RECT rect = MonitorInfo::GetSingleton().getMonitorInfo(MonitorFromWindow(GetHandle(), MONITOR_DEFAULTTOPRIMARY)).monitorInfo.rcMonitor;
+        RECT rect = MonitorInfo::GetSingleton()
+                        .getMonitorInfo(MonitorFromWindow(GetHandle(), MONITOR_DEFAULTTOPRIMARY))
+                        .monitorInfo.rcMonitor;
 
         if (fFullSceenState == FullSceenState::Windowed)
             SavePlacement();
@@ -329,58 +297,57 @@ namespace Win32
             fFullSceenState = FullSceenState::SingleScreen;
 
         UpdateWindowStyles();
-        //Set window pos for full screen with resize move and updateframe.
-        SetWindowPos(GetHandle(), nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top
-            , WindowPosHelper::ComposeFlags({ WindowPosOp::Move, WindowPosOp::Resize,WindowPosOp::UpdateFrame }));
-
-
+        // Set window pos for full screen with resize move and updateframe.
+        SetWindowPos(GetHandle(), nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
+                     WindowPosHelper::ComposeFlags({WindowPosOp::Move, WindowPosOp::Resize, WindowPosOp::UpdateFrame}));
     }
 
     void Win32Window::Move(const int16_t delta_x, const int16_t delta_y)
     {
         RECT rect;
         GetWindowRect(fHandleWindow, &rect);
-        MoveWindow(fHandleWindow, rect.left + delta_x, rect.top + delta_y, rect.right - rect.left, rect.bottom - rect.top, false);
+        MoveWindow(fHandleWindow, rect.left + delta_x, rect.top + delta_y, rect.right - rect.left,
+                   rect.bottom - rect.top, false);
     }
 
     void Win32Window::SetFullScreenState(FullSceenState fullScreenState)
     {
-    	switch (fullScreenState)
-    	{
-        case FullSceenState::Windowed:
-            SetWindowed();
-            break;
-        case FullSceenState::SingleScreen:
-            SetFullScreen(false);
-            break;
-        case FullSceenState::MultiScreen:
-            SetFullScreen(true);
-            break;
-        case FullSceenState::None:
-        default:
-            LL_EXCEPTION_UNEXPECTED_VALUE;
-    	}
+        switch (fullScreenState)
+        {
+            case FullSceenState::Windowed:
+                SetWindowed();
+                break;
+            case FullSceenState::SingleScreen:
+                SetFullScreen(false);
+                break;
+            case FullSceenState::MultiScreen:
+                SetFullScreen(true);
+                break;
+            case FullSceenState::None:
+            default:
+                LL_EXCEPTION_UNEXPECTED_VALUE;
+        }
     }
-	
+
     void Win32Window::ToggleFullScreen(bool multiMonitor)
     {
         switch (fFullSceenState)
         {
-        case FullSceenState::Windowed:
-            SetFullScreen(multiMonitor);
-            break;
-        case FullSceenState::SingleScreen:
-            if (multiMonitor == true)
+            case FullSceenState::Windowed:
                 SetFullScreen(multiMonitor);
-            else
+                break;
+            case FullSceenState::SingleScreen:
+                if (multiMonitor == true)
+                    SetFullScreen(multiMonitor);
+                else
+                    SetWindowed();
+                break;
+            case FullSceenState::MultiScreen:
                 SetWindowed();
-            break;
-        case FullSceenState::MultiScreen:
-            SetWindowed();
-            break;
-        case FullSceenState::None:
-        default:
-            LL_EXCEPTION_UNEXPECTED_VALUE;
+                break;
+            case FullSceenState::None:
+            default:
+                LL_EXCEPTION_UNEXPECTED_VALUE;
         }
     }
 
@@ -394,14 +361,13 @@ namespace Win32
     {
         WINDOWPLACEMENT placement{};
         GetWindowPlacement(fHandleWindow, &placement);
-        return { placement.rcNormalPosition.left, placement.rcNormalPosition.top };
+        return {placement.rcNormalPosition.left, placement.rcNormalPosition.top};
     }
-
 
     LRESULT Win32Window::GetCorner(const POINTS& points) const
     {
         LRESULT corner = HTERROR;
-        POINT p = { points.x , points.y };
+        POINT p = {points.x, points.y};
         ScreenToClient(GetHandle(), &p);
 
         const LLUtils::PointI32 point = p;
@@ -409,29 +375,29 @@ namespace Win32
         using ArrayDouble4 = std::array<double, 4>;
         ArrayDouble4 distancesToCorners;
 
-        distancesToCorners[0] = point.DistanceSquared({ 0,0 }); // Top left
-        distancesToCorners[1] = point.DistanceSquared({ windowSize.x,0 }); // Top right
-        distancesToCorners[2] = point.DistanceSquared(windowSize); // Botom right
-        distancesToCorners[3] = point.DistanceSquared({ 0, windowSize.y }); // Bottom left
+        distancesToCorners[0] = point.DistanceSquared({0, 0});             // Top left
+        distancesToCorners[1] = point.DistanceSquared({windowSize.x, 0});  // Top right
+        distancesToCorners[2] = point.DistanceSquared(windowSize);         // Botom right
+        distancesToCorners[3] = point.DistanceSquared({0, windowSize.y});  // Bottom left
         ArrayDouble4::const_iterator it_min = std::min_element(distancesToCorners.begin(), distancesToCorners.end());
 
         ArrayDouble4::difference_type index = it_min - distancesToCorners.begin();
         switch (index)
         {
-        case 0:
-            corner = HTTOPLEFT;
-            break;
-        case 1:
-            corner = HTTOPRIGHT;
-            break;
-        case 2:
-            corner = HTBOTTOMRIGHT;
-            break;
-        case 3:
-            corner = HTBOTTOMLEFT;
-            break;
-        default:
-            LL_EXCEPTION_UNEXPECTED_VALUE;
+            case 0:
+                corner = HTTOPLEFT;
+                break;
+            case 1:
+                corner = HTTOPRIGHT;
+                break;
+            case 2:
+                corner = HTBOTTOMRIGHT;
+                break;
+            case 3:
+                corner = HTBOTTOMLEFT;
+                break;
+            default:
+                LL_EXCEPTION_UNEXPECTED_VALUE;
         }
 
         return corner;
@@ -446,15 +412,15 @@ namespace Win32
         }
     }
 
-        void Win32Window::SetForground()
-        {
-            ::SetForegroundWindow(GetHandle());
-        }
+    void Win32Window::SetForground()
+    {
+        ::SetForegroundWindow(GetHandle());
+    }
     LLUtils::PointI32 Win32Window::GetWindowSize() const
     {
         RECT r;
         GetWindowRect(fHandleWindow, &r);
-        return{ r.right - r.left, r.bottom - r.top };
+        return {r.right - r.left, r.bottom - r.top};
     }
 
     LRESULT Win32Window::WindowProc(const WinMessage& message)
@@ -463,105 +429,109 @@ namespace Win32
         bool defaultProc = true;
         switch (message.message)
         {
-        case WM_NCHITTEST:
+            case WM_NCHITTEST:
 
-            if (GetTransparent() == true)
-                return HTTRANSPARENT;
+                if (GetTransparent() == true)
+                    return HTTRANSPARENT;
 
-            if (DefWindowProc(message.hWnd, message.message, message.wParam, message.lParam) == HTCLIENT)
-            {
-                switch (fLockMouseToWindowMode)
+                if (DefWindowProc(message.hWnd, message.message, message.wParam, message.lParam) == HTCLIENT)
                 {
-                case LockMouseToWindowMode::NoLock:
-                    //Do nothing
-                    break;
-                case LockMouseToWindowMode::LockResize:
-                    defaultProc = false;
-                    retValue = GetCorner(*reinterpret_cast<const POINTS*>(&message.lParam));
-                    break;
-                case LockMouseToWindowMode::LockMove:
-                {
-                    retValue = HTCAPTION;
-                    defaultProc = false;
+                    switch (fLockMouseToWindowMode)
+                    {
+                        case LockMouseToWindowMode::NoLock:
+                            // Do nothing
+                            break;
+                        case LockMouseToWindowMode::LockResize:
+                            defaultProc = false;
+                            retValue = GetCorner(*reinterpret_cast<const POINTS*>(&message.lParam));
+                            break;
+                        case LockMouseToWindowMode::LockMove:
+                        {
+                            retValue = HTCAPTION;
+                            defaultProc = false;
+                        }
+                        break;
+                        default:
+                            LL_EXCEPTION_UNEXPECTED_VALUE;
+                    }
                 }
                 break;
-                default:
-                    LL_EXCEPTION_UNEXPECTED_VALUE;
+            case WM_SETCURSOR:
+            {
+                if (GetMouseCursor() != nullptr)
+                {
+                    ::SetCursor(fMouseCursor);
+                    retValue = 1;
+                    defaultProc = false;
                 }
             }
             break;
-        case WM_SETCURSOR:
-        {
-            if (GetMouseCursor() != nullptr)
-            {
-                ::SetCursor(fMouseCursor);
-                retValue = 1;
-                defaultProc = false;
-            }
-
-        }
-            break;
-        case WM_MENUCHAR:
-            if (GetEnableMenuChar() == false)
-            {
-                defaultProc = false;
-                retValue = MAKELONG(0, MNC_CLOSE);
-            }
-            break;
-        case WM_SYSKEYDOWN: // Disable keyboard handling of the alt key of the menu char
-            if (GetEnableMenuChar() == false && message.wParam == VK_MENU)
-            {
-                defaultProc = false;
-                retValue = 0;
-            }
-            break;
-        case WM_NCLBUTTONDBLCLK:
-
-            switch (GetDoubleClickMode())
-            {
-            case DoubleClickMode::NotSet:
-                //Do nothing
-                break;
-            case DoubleClickMode::Default:
-                if (static_cast<WPARAM>(DefWindowProc(message.hWnd, WM_NCHITTEST, message.wParam, message.lParam)) != message.wParam)
+            case WM_MENUCHAR:
+                if (GetEnableMenuChar() == false)
+                {
                     defaultProc = false;
+                    retValue = MAKELONG(0, MNC_CLOSE);
+                }
                 break;
-            case DoubleClickMode::NonClientArea:
-            case DoubleClickMode::ClientArea:
-            case DoubleClickMode::EntireWindow:
+            case WM_SYSKEYDOWN:  // Disable keyboard handling of the alt key of the menu char
+                if (GetEnableMenuChar() == false && message.wParam == VK_MENU)
+                {
+                    defaultProc = false;
+                    retValue = 0;
+                }
+                break;
+            case WM_NCLBUTTONDBLCLK:
+
+                switch (GetDoubleClickMode())
+                {
+                    case DoubleClickMode::NotSet:
+                        // Do nothing
+                        break;
+                    case DoubleClickMode::Default:
+                        if (static_cast<WPARAM>(DefWindowProc(message.hWnd, WM_NCHITTEST, message.wParam,
+                                                              message.lParam)) != message.wParam)
+                            defaultProc = false;
+                        break;
+                    case DoubleClickMode::NonClientArea:
+                    case DoubleClickMode::ClientArea:
+                    case DoubleClickMode::EntireWindow:
+                    default:
+                        LL_EXCEPTION(LLUtils::Exception::ErrorCode::NotImplemented, "");
+                        break;
+                }
+                break;
+
+            case WM_ERASEBKGND:
+            {
+                defaultProc = false;  // custom handle background erasure
+                retValue = 1;         // always mark 'erased' flag.
+                if (GetEraseBackground() == true)
+                {
+                    RECT rect = GetClientRectangle();
+                    FillRect(reinterpret_cast<HDC>(message.wParam), &rect, fBackgroundCachedBrush);
+                }
+            }
+            break;
+            case WM_DESTROY:
+                DestroyResources();
+                NotifyRemovedForRelatedWindows();
+                break;
+
+            case WM_SYSCOMMAND:
+                switch (message.wParam)
+                {
+                    case SC_MAXIMIZE:
+                        fIsMaximized = true;
+                        break;
+                    case SC_RESTORE:
+                        fIsMaximized = false;
+                        break;
+                    default:
+                        break;
+                }
+                break;
             default:
-                LL_EXCEPTION(LLUtils::Exception::ErrorCode::NotImplemented, "");
                 break;
-            }
-            break;
-
-        case WM_ERASEBKGND:
-        {
-            defaultProc = false; // custom handle background erasure 
-            retValue = 1; // always mark 'erased' flag.
-            if (GetEraseBackground() == true)
-            {
-                RECT rect = GetClientRectangle();
-                FillRect(reinterpret_cast<HDC>(message.wParam), &rect, fBackgroundCachedBrush);
-            }
-        }
-        break;
-        case WM_DESTROY:
-            DestroyResources();
-            NotifyRemovedForRelatedWindows();
-            break;
-
-        case WM_SYSCOMMAND:
-            switch (message.wParam)
-            {
-            case SC_MAXIMIZE:
-                fIsMaximized = true;
-                break;
-            case SC_RESTORE:
-                fIsMaximized = false;
-                break;
-            }
-            break;
         }
 
         EventWinMessage winEvent;
@@ -569,19 +539,18 @@ namespace Win32
         winEvent.message = message;
         RaiseEvent(winEvent);
 
-        return (defaultProc == false ? retValue : DefWindowProc(message.hWnd, message.message, message.wParam, message.lParam));
+        return (defaultProc == false ? retValue
+                                     : DefWindowProc(message.hWnd, message.message, message.wParam, message.lParam));
     }
-
-
 
     LRESULT Win32Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        //These are the message that been sent up to WM_CREATE
-        // they won't be customly handle priot to WM_CREATE.
-        //WM_GETMINMAXINFO                0x0024
-        //WM_NCCREATE                     0x0081
-        //WM_NCCALCSIZE                   0x0083
-        //WM_CREATE                       0x0001
+        // These are the message that been sent up to WM_CREATE
+        //  they won't be customly handle priot to WM_CREATE.
+        // WM_GETMINMAXINFO                0x0024
+        // WM_NCCREATE                     0x0081
+        // WM_NCCALCSIZE                   0x0083
+        // WM_CREATE                       0x0001
         if (message == WM_CREATE)
         {
             CREATESTRUCT* s = reinterpret_cast<CREATESTRUCT*>(lParam);
@@ -590,11 +559,9 @@ namespace Win32
             reinterpret_cast<Win32Window*>(s->lpCreateParams)->fHandleWindow = hWnd;
         }
 
-
-            Win32Window* window = reinterpret_cast<Win32Window*>(GetProp(hWnd, WindowAddressPropertyName));
+        Win32Window* window = reinterpret_cast<Win32Window*>(GetProp(hWnd, WindowAddressPropertyName));
         if (window != nullptr)
-            return window->WindowProc({ hWnd,message,wParam,lParam });
-        
+            return window->WindowProc({hWnd, message, wParam, lParam});
 
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -649,8 +616,8 @@ namespace Win32
     {
         auto hWindowIcon = LoadIcon(GetModuleHandle(nullptr), iconPath);
 
-        SendMessage(WM_SETICON, ICON_BIG  , reinterpret_cast<LPARAM>(hWindowIcon));
+        SendMessage(WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hWindowIcon));
         SendMessage(WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hWindowIcon));
     }
 
-}
+}  // namespace Win32
