@@ -111,6 +111,7 @@ namespace Win32
             case WM_MOUSEMOVE:
                 break;
             default:
+                break;
                 // LL_EXCEPTION_UNEXPECTED_VALUE;
         }
     }
