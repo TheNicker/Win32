@@ -1,10 +1,12 @@
 ﻿
 cmake_minimum_required (VERSION 3.10)
 
+project(Win32)
+
 set(CMAKE_CXX_STANDARD 20)
+add_compile_definitions(NOMINMAX _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 include_directories("./Win32/Include")
 include_directories("./Win32/source")
-include_directories(./External/LLUtils/Include)
 
 option(WIN32_LIB_BUILD_SAMPLES "build win32 samples" ON)
 
@@ -24,6 +26,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   endif()
 endif()
 
+add_subdirectory("./External/LLUtils")
 add_subdirectory("Win32")
 
 if (WIN32_LIB_BUILD_SAMPLES)

@@ -11,6 +11,16 @@
 
 namespace Win32
 {
+    namespace
+    {
+        using EventCallbackFunctionPointer = bool (*)(const Event*);
+
+        const EventCallbackFunctionPointer* GetFunctionPointerTarget(const EventCallback& callback)
+        {
+            return callback.target<EventCallbackFunctionPointer>();
+        }
+    }  // namespace
+
     void Win32Window::AddChild(Win32Window* child)
     {
         fChildren.push_back(child);
@@ -140,8 +150,16 @@ namespace Win32
 
     void Win32Window::RemoveEventListener(EventCallback callback)
     {
-        fListeners.erase(std::remove_if(fListeners.begin(), fListeners.end(), [&](const EventCallback& elem)
-                                        { return LLUtils::getAddress(callback) == LLUtils::getAddress(elem); }));
+        const auto callbackTarget = GetFunctionPointerTarget(callback);
+        if (callbackTarget == nullptr)
+            return;
+
+        const auto newEnd = std::remove_if(fListeners.begin(), fListeners.end(), [&](const EventCallback& elem)
+                                           {
+                                               const auto elemTarget = GetFunctionPointerTarget(elem);
+                                               return elemTarget != nullptr && *callbackTarget == *elemTarget;
+                                           });
+        fListeners.erase(newEnd, fListeners.end());
     }
 
     bool Win32Window::IsInFocus() const
