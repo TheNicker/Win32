@@ -33,6 +33,13 @@ namespace Win32
         , LockMove // e.g. title
     };
 
+    enum class WindowDisplayState
+    {
+        Restored
+        , Minimized
+        , Maximized
+    };
+
     enum class WindowStyle : uint32_t
     {
         NoStyle = 0 << 0 // WS_CAPTION
@@ -71,6 +78,7 @@ namespace Win32
         LRESULT GetCorner(const POINTS& tag_points) const;
         LLUtils::PointI32 GetWindowSize() const;
         FullSceenState GetFullScreenState() const { return fFullSceenState; }
+        WindowDisplayState GetWindowDisplayState() const { return fWindowDisplayState; }
         void SetFullScreenState(FullSceenState fullScreenState);
         bool IsUnderMouseCursor() const;
         bool GetEraseBackground() const { return fEraseBackground; }
@@ -99,6 +107,7 @@ namespace Win32
         void SetSize(uint32_t width, uint32_t height);
         void SetPlacement(int32_t x, int32_t y, uint32_t width, uint32_t height);
         void ToggleFullScreen(bool multiMonitor = false);
+        void SetWindowDisplayState(WindowDisplayState windowDisplayState);
         void Move(const int16_t delta_x, const int16_t delta_y);
         void SetMouseCursor(HCURSOR cursor);
         void SetEraseBackground(bool eraseBackground) { fEraseBackground = eraseBackground; }
@@ -151,7 +160,7 @@ namespace Win32
         friend DragAndDropTarget;
         LockMouseToWindowMode fLockMouseToWindowMode = LockMouseToWindowMode::NoLock;
         bool fVisible = false;
-        bool fIsMaximized = false;
+        WindowDisplayState fWindowDisplayState = WindowDisplayState::Restored;
         WindowStyleFlags fWindowStyles = WindowStyle::NoStyle;
         bool fIsTransparent = false;
         bool fAlwaysOnTop = false;

@@ -347,6 +347,24 @@ namespace Win32
         }
     }
 
+    void Win32Window::SetWindowDisplayState(WindowDisplayState windowDisplayState)
+    {
+        switch (windowDisplayState)
+        {
+            case WindowDisplayState::Restored:
+                ShowWindow(GetHandle(), SW_RESTORE);
+                break;
+            case WindowDisplayState::Minimized:
+                ShowWindow(GetHandle(), SW_MINIMIZE);
+                break;
+            case WindowDisplayState::Maximized:
+                ShowWindow(GetHandle(), SW_MAXIMIZE);
+                break;
+            default:
+                LL_EXCEPTION_UNEXPECTED_VALUE;
+        }
+    }
+
     void Win32Window::ToggleFullScreen(bool multiMonitor)
     {
         switch (fFullSceenState)
@@ -535,14 +553,17 @@ namespace Win32
                 NotifyRemovedForRelatedWindows();
                 break;
 
-            case WM_SYSCOMMAND:
+            case WM_SIZE:
                 switch (message.wParam)
                 {
-                    case SC_MAXIMIZE:
-                        fIsMaximized = true;
+                    case SIZE_RESTORED:
+                        fWindowDisplayState = WindowDisplayState::Restored;
                         break;
-                    case SC_RESTORE:
-                        fIsMaximized = false;
+                    case SIZE_MINIMIZED:
+                        fWindowDisplayState = WindowDisplayState::Minimized;
+                        break;
+                    case SIZE_MAXIMIZED:
+                        fWindowDisplayState = WindowDisplayState::Maximized;
                         break;
                     default:
                         break;
